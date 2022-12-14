@@ -62,19 +62,31 @@ class CreateRecommendationList
          */
         if (isset($args['productSkus']) && $createdRecList->getId()) {
             $productSkus = $this->validateProductSkus($args['productSkus']);
-            foreach ($productSkus as $productSku) {
-                $recommendationListProduct = $this->recommendationListProductInterfaceFactory->create();
-                $recommendationListProduct->setListId((int)$createdRecList->getId())
-                    ->setSku($productSku);
-                $this->recommendationListProductRepository->save($recommendationListProduct);
-            }
+            $this->saveRecListProducts((int) $createdRecList->getId(), $productSkus);
         }
+
         return [
             'email' => $createdRecList->getEmail(),
             'friendName' => $createdRecList->getFriendName(),
             'title' => $createdRecList->getTitle(),
             'note' => $createdRecList->getNote()
         ];
+    }
+
+    /**
+     * @param int $listId
+     * @param array $skus
+     * @return void
+     * @throws CouldNotSaveException
+     */
+    private function saveRecListProducts(int $listId, array $skus): void
+    {
+        foreach ($skus as $productSku) {
+            $recommendationListProduct = $this->recommendationListProductInterfaceFactory->create();
+            $recommendationListProduct->setListId($listId)
+                ->setSku($productSku);
+            $this->recommendationListProductRepository->save($recommendationListProduct);
+        }
     }
 
     /**
